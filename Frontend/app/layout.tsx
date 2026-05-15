@@ -16,15 +16,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <nav className="bg-white shadow-sm border-b">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <h1 className="text-xl font-bold text-blue-600">GlobalTNA Service Board</h1>
-          </div>
-        </nav>
-        <main className="max-w-6xl mx-auto px-4 py-8">
-          {children}
-        </main>
+      <body className={`${inter.className} bg-gray-50`}>
+        {children}
       </body>
     </html>
   );
