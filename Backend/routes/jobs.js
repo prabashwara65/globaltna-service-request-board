@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Job = require('../models/Job');
+const Job = require('../model/Job');
 
 // GET /api/jobs - Get all jobs with filters
 router.get('/', async (req, res) => {
