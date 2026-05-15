@@ -19,10 +19,6 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/jobs', jobRoutes);
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
 
 // Error handler
 app.use((err, req, res, next) => {
