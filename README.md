@@ -51,7 +51,7 @@ npm install
 
 ### Run Instructions
 ## Start the Backend Server
-Open a terminal and run:
+# Open a terminal and run:
 
 cd backend
 npm run dev
@@ -62,6 +62,8 @@ cd frontend
 npm run dev
 
 ##  Database Seeding
+# Open a terminal and run:
+
 cd backend
 node seed.js
 
