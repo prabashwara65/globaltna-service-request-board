@@ -1,31 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal } from 'lucide-react';
 
-interface CreateJobInput {
+interface Job {
+  _id: string;
   title: string;
   description: string;
   category: string;
   location: string;
   contactName: string;
   contactEmail: string;
+  status: 'Open' | 'In Progress' | 'Closed';
+  createdAt: string;
 }
 
-export default function NewJobPage() {
+export default function EditJobPage() {
+  const { id } = useParams() as { id: string };
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   
-  const [formData, setFormData] = useState<CreateJobInput>({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: 'Plumbing',
     location: '',
     contactName: '',
     contactEmail: '',
+    status: 'Open' as 'Open' | 'In Progress' | 'Closed',
   });
 
   const getCategoryColor = (category: string): string => {
@@ -48,6 +54,32 @@ export default function NewJobPage() {
     }
   };
 
+  // Fetch job data on load
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        const res = await fetch(`http://localhost:5050/api/jobs/${id}`);
+        if (!res.ok) throw new Error('Job not found');
+        const data: Job = await res.json();
+        setFormData({
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          location: data.location,
+          contactName: data.contactName,
+          contactEmail: data.contactEmail,
+          status: data.status,
+        });
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -55,70 +87,54 @@ export default function NewJobPage() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     setError('');
 
-    // Client-side validation
-    if (!formData.title.trim()) {
-      setError('Title is required');
-      setLoading(false);
-      return;
-    }
-    if (!formData.description.trim()) {
-      setError('Description is required');
-      setLoading(false);
-      return;
-    }
-    if (!formData.location.trim()) {
-      setError('Location is required');
-      setLoading(false);
-      return;
-    }
-    if (!formData.contactName.trim()) {
-      setError('Contact name is required');
-      setLoading(false);
-      return;
-    }
-    if (!formData.contactEmail.match(/^\S+@\S+\.\S+$/)) {
-      setError('Valid email is required');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`http://localhost:5050/api/jobs`, {
-        method: 'POST',
+      // Change from PUT to PATCH
+      const res = await fetch(`http://localhost:5050/api/jobs/${id}`, {
+        method: 'PATCH',  // Changed from PUT to PATCH
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ status: formData.status }), // Only send status
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to create job');
+        throw new Error(data.error || 'Failed to update job');
       }
 
-      router.push('/');
+      router.push(`/jobs/${id}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const categoryColor = getCategoryColor(formData.category);
   const IconComponent = getCategoryIcon(formData.category);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96" style={{ backgroundColor: '#151517' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading job details...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#151517' }}>
       <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
-        {/* Back button */}
         <Link 
-          href="/" 
+          href={`/jobs/${id}`} 
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition mb-6"
         >
-          <span>←</span> Back to Home
+          <span>←</span> Back to Job Details
         </Link>
 
         {/* Main Card */}
@@ -139,7 +155,7 @@ export default function NewJobPage() {
                 />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">
-                Post New Service Request
+                Edit Service Request
               </h1>
             </div>
 
@@ -259,17 +275,47 @@ export default function NewJobPage() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full text-white px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
-                  style={{ backgroundColor: '#027FDB' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0268B5'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#027FDB'}
-                >
-                  {loading ? 'Creating...' : 'Post Request'}
-                </button>
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Status *
+                  </label>
+                  <select
+                    name="status"
+                    required
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 text-white px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
+                    style={{ backgroundColor: '#027FDB' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0268B5'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#027FDB'}
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <Link
+                    href={`/jobs/${id}`}
+                    className="flex-1 text-gray-400 px-4 py-2.5 text-sm font-medium text-center transition hover:text-white"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#25252B'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1A1A1E'}
+                  >
+                    Cancel
+                  </Link>
+                </div>
               </div>
             </form>
           </div>
