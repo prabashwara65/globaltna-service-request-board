@@ -52,7 +52,7 @@ npm install
 Open a terminal and run:
 
 cd backend
-npm run dev
+npm start
 
 ### Open another terminal and run:
 
