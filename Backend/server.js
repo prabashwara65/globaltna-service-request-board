@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const jobRoutes = require('./routes/jobs');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -17,7 +18,11 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.log(' MongoDB error:', err));
 
 // Routes
+//Jobs router
 app.use('/api/jobs', jobRoutes);
+
+//Auth routers
+app.use('/api/auth', authRoutes);
 
 
 // Error handler

@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal } from 'lucide-react';
+import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal, type LucideIcon } from 'lucide-react';
+import { useAuth } from '../../../../context/AuthContext';
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Plumbing: Wrench,
+  Electrical: Zap,
+  Painting: Paintbrush,
+  Joinery: Hammer,
+  Other: MoreHorizontal,
+};
+
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Something went wrong';
+};
 
 interface Job {
   _id: string;
@@ -20,6 +33,7 @@ interface Job {
 export default function EditJobPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
+  const { isAuthenticated, token } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -45,13 +59,7 @@ export default function EditJobPage() {
   };
 
   const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Plumbing': return Wrench;
-      case 'Electrical': return Zap;
-      case 'Painting': return Paintbrush;
-      case 'Joinery': return Hammer;
-      default: return MoreHorizontal;
-    }
+    return CATEGORY_ICONS[category] || MoreHorizontal;
   };
 
   // Fetch job data on load
@@ -70,8 +78,8 @@ export default function EditJobPage() {
           contactEmail: data.contactEmail,
           status: data.status,
         });
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
@@ -89,6 +97,11 @@ export default function EditJobPage() {
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!isAuthenticated || !token) {
+      setError('Please log in to update job status.');
+      return;
+    }
+
     setSaving(true);
     setError('');
 
@@ -96,7 +109,10 @@ export default function EditJobPage() {
       // Change from PUT to PATCH
       const res = await fetch(`http://localhost:5050/api/jobs/${id}`, {
         method: 'PATCH',  // Changed from PUT to PATCH
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ status: formData.status }), // Only send status
       });
 
@@ -106,15 +122,20 @@ export default function EditJobPage() {
       }
 
       router.push(`/jobs/${id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setSaving(false);
     }
   };
 
   const categoryColor = getCategoryColor(formData.category);
-  const IconComponent = getCategoryIcon(formData.category);
+  const icon = createElement(getCategoryIcon(formData.category), {
+    className: 'w-6 h-6',
+    stroke: 'white',
+    fill: 'white',
+    strokeWidth: 1.5,
+  });
 
   if (loading) {
     return (
@@ -147,12 +168,7 @@ export default function EditJobPage() {
                 className="w-12 h-12 flex items-center justify-center"
                 style={{ backgroundColor: categoryColor }}
               >
-                <IconComponent 
-                  className="w-6 h-6" 
-                  stroke="white" 
-                  fill="white" 
-                  strokeWidth={1.5}
-                />
+                {icon}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">
                 Edit Service Request
@@ -295,10 +311,15 @@ export default function EditJobPage() {
                 </div>
 
                 {/* Action Buttons */}
+                {!isAuthenticated && (
+                  <Link href="/login" className="text-sm hover:underline" style={{ color: '#FF495F' }}>
+                    Log in to update status
+                  </Link>
+                )}
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={saving || !isAuthenticated}
                     className="flex-1 text-white px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
                     style={{ backgroundColor: '#027FDB' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0268B5'}

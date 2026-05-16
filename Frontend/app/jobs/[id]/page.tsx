@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal } from 'lucide-react';
+import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal, type LucideIcon } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Plumbing: Wrench,
+  Electrical: Zap,
+  Painting: Paintbrush,
+  Joinery: Hammer,
+  Other: MoreHorizontal,
+};
+
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Something went wrong';
+};
 
 interface Job {
   _id: string;
@@ -20,6 +33,7 @@ interface Job {
 export default function JobDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
+  const { isAuthenticated, token } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -38,9 +52,9 @@ export default function JobDetailPage() {
         }
         const data = await res.json();
         setJob(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Fetch error:', err);
-        setError(err.message);
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
@@ -50,20 +64,31 @@ export default function JobDetailPage() {
   }, [id]);
 
   const handleStatusChange = async (newStatus: string) => {
+    if (!isAuthenticated || !token) {
+      alert('Please log in to update job status.');
+      return;
+    }
+
     setUpdating(true);
     try {
       const res = await fetch(`http://localhost:5050/api/jobs/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ status: newStatus }),
       });
       
-      if (!res.ok) throw new Error('Failed to update status');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update status');
+      }
       
       const updated = await res.json();
       setJob(updated);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     } finally {
       setUpdating(false);
     }
@@ -80,19 +105,13 @@ export default function JobDetailPage() {
       if (!res.ok) throw new Error('Failed to delete');
       
       router.push('/');
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err));
     }
   };
 
   const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Plumbing': return Wrench;
-      case 'Electrical': return Zap;
-      case 'Painting': return Paintbrush;
-      case 'Joinery': return Hammer;
-      default: return MoreHorizontal;
-    }
+    return CATEGORY_ICONS[category] || MoreHorizontal;
   };
 
   const getCategoryColor = (category: string): string => {
@@ -138,7 +157,12 @@ export default function JobDetailPage() {
 
   const statusStyle = getStatusStyle(job.status);
   const categoryColor = getCategoryColor(job.category);
-  const IconComponent = getCategoryIcon(job.category);
+  const icon = createElement(getCategoryIcon(job.category), {
+    className: 'w-7 h-7',
+    stroke: 'white',
+    fill: 'white',
+    strokeWidth: 1.5,
+  });
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#151517' }}>
@@ -161,12 +185,7 @@ export default function JobDetailPage() {
                 className="w-14 h-14 flex items-center justify-center"
                 style={{ backgroundColor: categoryColor }}
               >
-                <IconComponent 
-                  className="w-7 h-7" 
-                  stroke="white" 
-                  fill="white" 
-                  strokeWidth={1.5}
-                />
+                {icon}
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
@@ -223,7 +242,7 @@ export default function JobDetailPage() {
                 <select
                   value={job.status}
                   onChange={(e) => handleStatusChange(e.target.value)}
-                  disabled={updating}
+                  disabled={updating || !isAuthenticated}
                   className="border-0 px-4 py-2 text-sm focus:ring-2 focus:ring-gray-500 text-white"
                   style={{ backgroundColor: '#1A1A1E' }}
                 >
@@ -232,6 +251,11 @@ export default function JobDetailPage() {
                   <option value="Closed">Closed</option>
                 </select>
                 {updating && <span className="text-sm text-gray-500">Updating...</span>}
+                {!isAuthenticated && (
+                  <Link href="/login" className="text-sm hover:underline" style={{ color: '#FF495F' }}>
+                    Log in to update status
+                  </Link>
+                )}
               </div>
             </div>
 
