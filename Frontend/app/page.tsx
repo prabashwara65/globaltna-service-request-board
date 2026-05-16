@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Job } from './types/job';
 
 export default function HomePage() {
+  
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -12,7 +13,7 @@ export default function HomePage() {
 
   const fetchJobs = async () => {
     try {
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/api/jobs`;
+      let url = `http://localhost:5050/api/jobs`;
       const params = new URLSearchParams();
       if (categoryFilter !== 'all') params.append('category', categoryFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
