@@ -60,7 +60,7 @@ cd frontend
 npm run dev
 
 ##  Database Seeding
-###Open a terminal and run:
+### Open a terminal and run:
 
 cd backend
 node seed.js
@@ -72,3 +72,9 @@ Open your browser and navigate to: http://localhost:3000
 ### Sample Login Credentials
 email - user@gmail.com
 pass - user123
+
+## Step 5:Run Unit Tests (Backend)
+### Open a terminal and run:
+
+cd backend
+npm test
