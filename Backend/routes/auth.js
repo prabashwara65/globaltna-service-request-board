@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../model/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key_here_change_in_production';
 
@@ -122,4 +122,4 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
-module.exports = { router, verifyToken };
+module.exports = router;
