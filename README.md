@@ -65,7 +65,6 @@ npm run dev
 cd backend
 node seed.js
 
-
 ## Step 4: Open the Application
 Open your browser and navigate to: http://localhost:3000
 
@@ -73,7 +72,7 @@ Open your browser and navigate to: http://localhost:3000
 email - user@gmail.com
 pass - user123
 
-## Step 5:Run Unit Tests (Backend)
+## Step 5: Run Unit Tests (Backend)
 ### Open a terminal and run:
 
 cd backend
