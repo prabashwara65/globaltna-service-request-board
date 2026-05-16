@@ -91,23 +91,23 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#151517' }}>
-      {/* Header */}
+      {/* Header with padding */}
       <div style={{ backgroundColor: '#151517' }}>
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-12 md:px-8 md:py-16">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white tracking-tight font-poppins">
+            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight font-poppins">
               Service Requests
             </h1>
-            <p className="text-gray-400 mt-2 text-lg font-poppins">
+            <p className="text-gray-400 mt-3 text-base md:text-lg font-poppins max-w-2xl mx-auto">
               Find and post service requests in your area
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Filters */}
-        <div style={{ backgroundColor: '#151517' }} className="mb-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        {/* Filters Section */}
+        <div style={{ backgroundColor: '#151517' }} className="mb-10">
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[180px]">
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 font-poppins">
@@ -159,9 +159,16 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Stats Section */}
+        <div className="mb-8">
+          <p className="text-gray-500 text-sm font-poppins">
+            Showing <span className="text-white font-semibold">{jobs.length}</span> requests
+          </p>
+        </div>
+
         {/* Cards Grid */}
         {jobs.length === 0 ? (
-          <div className="text-center py-20" style={{ backgroundColor: '#212023' }}>
+          <div className="text-center py-20 px-6" style={{ backgroundColor: '#212023' }}>
             <div className="w-20 h-20 flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#1F1F23' }}>
               <Wrench className="w-10 h-10" stroke="#6B7280" fill="#6B7280" />
             </div>
@@ -171,7 +178,7 @@ export default function HomePage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {jobs.map((job: Job) => {
               const statusStyle = getStatusStyle(job.status);
               const categoryColor = getCategoryColor(job.category);
@@ -187,12 +194,9 @@ export default function HomePage() {
                       height: '320px',
                     }}
                   >
-                    {/* NO TOP ACCENT LINE - REMOVED */}
-                    
                     <div className="p-5 flex flex-col h-full">
                       {/* Top row: Icon and Status + Date */}
                       <div className="flex justify-between items-start mb-3">
-                        {/* ORIGINAL ICON - Colored square with WHITE icon */}
                         <div 
                           className="w-10 h-10 flex items-center justify-center"
                           style={{ backgroundColor: categoryColor }}
@@ -205,7 +209,6 @@ export default function HomePage() {
                           />
                         </div>
                         
-                        {/* Status and Date container */}
                         <div className="flex flex-col items-end gap-1">
                           <div className={`flex items-center px-2.5 py-1 ${statusStyle.bg} ${statusStyle.text} text-xs font-medium font-poppins`}>
                             <span>{statusStyle.label}</span>
@@ -216,13 +219,19 @@ export default function HomePage() {
                         </div>
                       </div>
                       
-                      <h3 className="font-bold text-white text-lg mb-2 group-hover:text-gray-300 transition line-clamp-1 font-poppins">
-                        {job.title}
-                      </h3>
+                      {/* Title - 75% width */}
+                      <div style={{ width: '75%' }}>
+                        <h3 className="font-bold text-white text-lg mb-2 group-hover:text-gray-300 transition line-clamp-1 font-poppins">
+                          {job.title}
+                        </h3>
+                      </div>
                       
-                      <p className="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3 flex-1 font-poppins">
-                        {job.description}
-                      </p>
+                      {/* Description - 75% width */}
+                      <div style={{ width: '75%' }}>
+                        <p className="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3 flex-1 font-poppins">
+                          {job.description}
+                        </p>
+                      </div>
                       
                       {/* Border line at 75% width from left */}
                       <div className="pt-3 mt-auto">
@@ -241,23 +250,38 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* DUPLICATE ICON - Absolute positioned at bottom right, gray transparent */}
+                    {/* DUPLICATE ICON WITH CATEGORY NAME - Absolute positioned at bottom right */}
                     <div 
-                      className="absolute flex items-center justify-center"
+                      className="absolute flex flex-col items-center justify-center"
                       style={{ 
-                        bottom: '0',
-                        right: '0',
+                        bottom: '12px',
+                        right: '5px',
                         width: '100px',
-                        height: '100px',
-                        backgroundColor: 'rgba(128, 128, 128, 0.15)',
+                        height: 'auto',
                       }}
                     >
-                      <IconComponent 
-                        className="w-12 h-12" 
-                        stroke="rgba(255, 255, 255, 0.2)" 
-                        fill="rgba(255, 255, 255, 0.05)" 
-                        strokeWidth={1.5}
-                      />
+                      <div 
+                        className="flex items-center justify-center rounded-4xl"
+                        style={{ 
+                          width: '50px',
+                          height: '50px',
+                          backgroundColor: 'rgba(128, 128, 128, 0.15)',
+                          marginBottom: '6px',
+                        }}
+                      >
+                        <IconComponent 
+                          className="w-6 h-6" 
+                          stroke="rgba(255, 255, 255, 0.3)" 
+                          fill="rgba(255, 255, 255, 0.05)" 
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                      <span 
+                        className="text-gray-500 text-xs font-poppins text-center"
+                        style={{ fontSize: '10px', letterSpacing: '0.5px' }}
+                      >
+                        {job.category}
+                      </span>
                     </div>
                   </div>
                 </Link>
