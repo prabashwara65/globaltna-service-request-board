@@ -25,50 +25,49 @@ A full-stack web application where homeowners can post service requests and trad
 -  Hover animations and transitions
 
 
-###  Setup Instructions
-
-### Step 1: Clone the Repository
+# Setup Instructions
+## Step 1: Clone the Repository
 
 git clone https://github.com/prabashwara65/globaltna-service-request-board.git
 cd globaltna-service-request-board
 
 
-### Step 2: Install Backend Dependencies
+## Step 2: Install Backend Dependencies
 
 cd backend
 npm install
 
-## Backend .env 
+### Backend .env 
 MONGODB_URI=mongodb+srv://prabashwara65_db_user:cB6mZ92ii5lFlFZT@cluster0.cpz5u70.mongodb.net/?appName=Cluster0
 PORT=5050
 JWT_SECRET=my_secret_jwt_key
 
-### Step 3: Install Frontend Dependencies
+## Step 3: Install Frontend Dependencies
 
 cd frontend
 npm install
 
 
-### Run Instructions
+# Run Instructions
 ## Start the Backend Server
 Open a terminal and run:
 
 cd backend
 npm run dev
 
- Open another terminal and run:
+### Open another terminal and run:
 
 cd frontend
 npm run dev
 
 ##  Database Seeding
-Open a terminal and run:
+###Open a terminal and run:
 
 cd backend
 node seed.js
 
 
-### Step 4: Open the Application
+## Step 4: Open the Application
 Open your browser and navigate to: http://localhost:3000
 
 ### Sample Login Credentials
