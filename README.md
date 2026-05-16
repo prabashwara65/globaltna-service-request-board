@@ -61,6 +61,14 @@ npm run dev
 cd frontend
 npm run dev
 
+##  Database Seeding
+cd backend
+node seed.js
+
 
 ### Step 4: Open the Application
 Open your browser and navigate to: http://localhost:3000
+
+### Sample Login Credentials
+email - user@gmail.com
+pass - user123
