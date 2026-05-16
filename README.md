@@ -48,7 +48,6 @@ cd frontend
 npm install
 
 
-# Run Instructions
 ## Start the Backend Server
 Open a terminal and run:
 
