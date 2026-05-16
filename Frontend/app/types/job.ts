@@ -9,3 +9,12 @@ export interface Job {
   status: 'Open' | 'In Progress' | 'Closed';
   createdAt: string;
 }
+
+export interface CreateJobInput {
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  contactName: string;
+  contactEmail: string;
+}
