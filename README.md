@@ -56,7 +56,7 @@ npm install
 cd backend
 npm run dev
 
-## Open another terminal and run:
+# Open another terminal and run:
 
 cd frontend
 npm run dev
