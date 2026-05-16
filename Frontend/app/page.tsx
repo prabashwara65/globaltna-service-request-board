@@ -93,7 +93,7 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#151517' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#151517' }}>
-        <div className="max-w-7xl mx-auto px-6 py-12 md:px-8 md:py-16">
+        <div className="max-w-7xl mx-auto px-6 py-6 md:px-8 md:py-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
               Service Requests

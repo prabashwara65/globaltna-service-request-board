@@ -17,7 +17,11 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.log(' MongoDB error:', err));
 
 // Routes
+//Jobs router
 app.use('/api/jobs', jobRoutes);
+
+//Auth routers
+app.use('/api/auth', authRoutes);
 
 
 // Error handler
