@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal } from 'lucide-react';
 
 interface Job {
   _id: string;
@@ -84,115 +85,177 @@ export default function JobDetailPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Plumbing': return Wrench;
+      case 'Electrical': return Zap;
+      case 'Painting': return Paintbrush;
+      case 'Joinery': return Hammer;
+      default: return MoreHorizontal;
+    }
+  };
+
+  const getCategoryColor = (category: string): string => {
+    switch (category) {
+      case 'Plumbing': return '#9C38A8';
+      case 'Electrical': return '#027FDB';
+      case 'Painting': return '#40D774';
+      case 'Joinery': return '#F84738';
+      default: return '#6B7280';
+    }
+  };
+
+  const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Open': return 'bg-green-100 text-green-800';
-      case 'In Progress': return 'bg-yellow-100 text-yellow-800';
-      case 'Closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100';
+      case 'Open': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Open' };
+      case 'In Progress': return { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'In Progress' };
+      case 'Closed': return { bg: 'bg-gray-500/10', text: 'text-gray-400', label: 'Closed' };
+      default: return { bg: 'bg-gray-500/10', text: 'text-gray-400', label: status };
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-600">Loading job details...</div>
+      <div className="flex justify-center items-center h-96" style={{ backgroundColor: '#151517' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading job details...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500">{error || 'Job not found'}</p>
-        <Link href="/" className="text-blue-600 hover:underline mt-4 inline-block">
-          ← Back to Home
+      <div className="min-h-screen flex flex-col justify-center items-center" style={{ backgroundColor: '#151517' }}>
+        <p className="text-red-500 mb-4">{error || 'Job not found'}</p>
+        <Link href="/" className="text-gray-400 hover:text-white transition inline-flex items-center gap-2">
+          <span>←</span> Back to Home
         </Link>
       </div>
     );
   }
 
+  const statusStyle = getStatusStyle(job.status);
+  const categoryColor = getCategoryColor(job.category);
+  const IconComponent = getCategoryIcon(job.category);
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <Link href="/" className="text-blue-600 hover:underline">
-          ← Back to Home
+    <div className="min-h-screen" style={{ backgroundColor: '#151517' }}>
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
+        {/* Back button */}
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition mb-6"
+        >
+          <span>←</span> Back to all requests
         </Link>
-      </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex justify-between items-start">
-            <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(job.status)}`}>
-              {job.status}
-            </span>
-          </div>
-        </div>
+        {/* Main Card */}
+        <div style={{ backgroundColor: '#212023', border: '1px solid #2A2A2E' }}>
+          <div className="h-1" style={{ backgroundColor: categoryColor }}></div>
+          
+          <div className="p-6 md:p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <div 
+                className="w-14 h-14 flex items-center justify-center"
+                style={{ backgroundColor: categoryColor }}
+              >
+                <IconComponent 
+                  className="w-7 h-7" 
+                  stroke="white" 
+                  fill="white" 
+                  strokeWidth={1.5}
+                />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                  {job.title}
+                </h1>
+                <div className={`inline-flex items-center px-3 py-1 ${statusStyle.bg} ${statusStyle.text} text-sm font-medium`}>
+                  {statusStyle.label}
+                </div>
+              </div>
+            </div>
 
-        <div className="p-6 space-y-4">
-          <div>
-            <h2 className="text-sm font-medium text-gray-500">Description</h2>
-            <p className="text-gray-900 mt-1">{job.description}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Category</h2>
-              <p className="text-gray-900 mt-1">{job.category}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Location</h2>
-              <p className="text-gray-900 mt-1">{job.location}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Contact Name</h2>
-              <p className="text-gray-900 mt-1">{job.contactName}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Contact Email</h2>
-              <p className="text-gray-900 mt-1">{job.contactEmail}</p>
-            </div>
-            <div>
-              <h2 className="text-sm font-medium text-gray-500">Posted Date</h2>
-              <p className="text-gray-900 mt-1">
-                {new Date(job.createdAt).toLocaleDateString()}
+            {/* Description */}
+            <div className="mb-6">
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Description
+              </h2>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                {job.description}
               </p>
             </div>
-          </div>
 
-          {/* Status Update */}
-          <div className="pt-4 border-t">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Update Status
-            </label>
-            <select
-              value={job.status}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              disabled={updating}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Closed">Closed</option>
-            </select>
-            {updating && <span className="ml-3 text-sm text-gray-500">Updating...</span>}
-          </div>
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="p-3" style={{ backgroundColor: '#1A1A1E' }}>
+                <div className="text-xs text-gray-500 mb-1">Category</div>
+                <div className="text-white text-sm font-medium">{job.category}</div>
+              </div>
+              <div className="p-3" style={{ backgroundColor: '#1A1A1E' }}>
+                <div className="text-xs text-gray-500 mb-1">Location</div>
+                <div className="text-white text-sm font-medium">{job.location}</div>
+              </div>
+              <div className="p-3" style={{ backgroundColor: '#1A1A1E' }}>
+                <div className="text-xs text-gray-500 mb-1">Contact Name</div>
+                <div className="text-white text-sm font-medium">{job.contactName}</div>
+              </div>
+              <div className="p-3" style={{ backgroundColor: '#1A1A1E' }}>
+                <div className="text-xs text-gray-500 mb-1">Contact Email</div>
+                <div className="text-white text-sm font-medium">{job.contactEmail}</div>
+              </div>
+              <div className="p-3" style={{ backgroundColor: '#1A1A1E' }}>
+                <div className="text-xs text-gray-500 mb-1">Posted Date</div>
+                <div className="text-white text-sm font-medium">
+                  {new Date(job.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            </div>
 
-          {/* Action Buttons */}
-          <div className="pt-4 flex gap-3">
-            <Link
-              href={`/jobs/edit/${job._id}`}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-center"
-            >
-              Edit Request
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-            >
-              Delete Request
-            </button>
+            {/* Status Update Section */}
+            <div className="mb-6 pt-4 border-t border-gray-800">
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Update Status
+              </label>
+              <div className="flex items-center gap-3">
+                <select
+                  value={job.status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  disabled={updating}
+                  className="border-0 px-4 py-2 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                  style={{ backgroundColor: '#1A1A1E' }}
+                >
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Closed">Closed</option>
+                </select>
+                {updating && <span className="text-sm text-gray-500">Updating...</span>}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-gray-800">
+              <Link
+                href={`/jobs/edit/${job._id}`}
+                className="flex-1 text-white px-4 py-2 text-center text-sm font-medium transition"
+                style={{ backgroundColor: '#027FDB' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0268B5'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#027FDB'}
+              >
+                Edit Request
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 text-center text-sm font-medium transition"
+                style={{ backgroundColor: '#F84738' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#D63A2C'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F84738'}
+              >
+                Delete Request
+              </button>
+            </div>
           </div>
         </div>
       </div>

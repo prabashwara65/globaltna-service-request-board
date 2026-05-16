@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Wrench, Zap, Paintbrush, Hammer, MoreHorizontal } from 'lucide-react';
 
 interface Job {
   _id: string;
@@ -32,6 +33,26 @@ export default function EditJobPage() {
     contactEmail: '',
     status: 'Open' as 'Open' | 'In Progress' | 'Closed',
   });
+
+  const getCategoryColor = (category: string): string => {
+    switch (category) {
+      case 'Plumbing': return '#9C38A8';
+      case 'Electrical': return '#027FDB';
+      case 'Painting': return '#40D774';
+      case 'Joinery': return '#F84738';
+      default: return '#6B7280';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Plumbing': return Wrench;
+      case 'Electrical': return Zap;
+      case 'Painting': return Paintbrush;
+      case 'Joinery': return Hammer;
+      default: return MoreHorizontal;
+    }
+  };
 
   // Fetch job data on load
   useEffect(() => {
@@ -66,16 +87,17 @@ export default function EditJobPage() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     setError('');
 
     try {
+      // Change from PUT to PATCH
       const res = await fetch(`http://localhost:5050/api/jobs/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',  // Changed from PUT to PATCH
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ status: formData.status }), // Only send status
       });
 
       if (!res.ok) {
@@ -91,159 +113,214 @@ export default function EditJobPage() {
     }
   };
 
+  const categoryColor = getCategoryColor(formData.category);
+  const IconComponent = getCategoryIcon(formData.category);
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-gray-400 text-lg">Loading...</div>
+      <div className="flex justify-center items-center h-96" style={{ backgroundColor: '#151517' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading job details...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-6">
-        <Link href={`/jobs/${id}`} className="text-blue-600 hover:underline">
-          ← Back to Job Details
+    <div className="min-h-screen" style={{ backgroundColor: '#151517' }}>
+      <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
+        <Link 
+          href={`/jobs/${id}`} 
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition mb-6"
+        >
+          <span>←</span> Back to Job Details
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mt-2">Edit Service Request</h1>
-      </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+        {/* Main Card */}
+        <div style={{ backgroundColor: '#212023', border: '1px solid #2A2A2E' }}>
+          <div className="h-1" style={{ backgroundColor: categoryColor }}></div>
+          
+          <div className="p-6 md:p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div 
+                className="w-12 h-12 flex items-center justify-center"
+                style={{ backgroundColor: categoryColor }}
+              >
+                <IconComponent 
+                  className="w-6 h-6" 
+                  stroke="white" 
+                  fill="white" 
+                  strokeWidth={1.5}
+                />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">
+                Edit Service Request
+              </h1>
+            </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              name="title"
-              required
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Need a plumber for leaking tap"
-            />
-          </div>
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="mb-6 p-3" style={{ backgroundColor: '#F84738', color: 'white' }}>
+                  {error}
+                </div>
+              )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description *
-            </label>
-            <textarea
-              name="description"
-              required
-              rows={4}
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Describe the issue in detail..."
-            />
-          </div>
+              <div className="space-y-5">
+                {/* Title */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    required
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                    placeholder="e.g., Need a plumber for leaking tap"
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category *
-            </label>
-            <select
-              name="category"
-              required
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Plumbing">Plumbing</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Painting">Painting</option>
-              <option value="Joinery">Joinery</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+                {/* Description */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    required
+                    rows={5}
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white resize-none"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                    placeholder="Describe the issue in detail..."
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location *
-            </label>
-            <input
-              type="text"
-              name="location"
-              required
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Glasgow"
-            />
-          </div>
+                {/* Category and Location */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Category *
+                    </label>
+                    <select
+                      name="category"
+                      required
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                      style={{ backgroundColor: '#1A1A1E' }}
+                    >
+                      <option value="Plumbing">Plumbing</option>
+                      <option value="Electrical">Electrical</option>
+                      <option value="Painting">Painting</option>
+                      <option value="Joinery">Joinery</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Name *
-            </label>
-            <input
-              type="text"
-              name="contactName"
-              required
-              value={formData.contactName}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Your full name"
-            />
-          </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      required
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                      style={{ backgroundColor: '#1A1A1E' }}
+                      placeholder="e.g., Glasgow"
+                    />
+                  </div>
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Email *
-            </label>
-            <input
-              type="email"
-              name="contactEmail"
-              required
-              value={formData.contactEmail}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="your@email.com"
-            />
-          </div>
+                {/* Contact Name and Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Contact Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="contactName"
+                      required
+                      value={formData.contactName}
+                      onChange={handleChange}
+                      className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                      style={{ backgroundColor: '#1A1A1E' }}
+                      placeholder="Your full name"
+                    />
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status *
-            </label>
-            <select
-              name="status"
-              required
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Contact Email *
+                    </label>
+                    <input
+                      type="email"
+                      name="contactEmail"
+                      required
+                      value={formData.contactEmail}
+                      onChange={handleChange}
+                      className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                      style={{ backgroundColor: '#1A1A1E' }}
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
 
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-            <Link
-              href={`/jobs/${id}`}
-              className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-center hover:bg-gray-300 transition"
-            >
-              Cancel
-            </Link>
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Status *
+                  </label>
+                  <select
+                    name="status"
+                    required
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-gray-500 text-white"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 text-white px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
+                    style={{ backgroundColor: '#027FDB' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0268B5'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#027FDB'}
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <Link
+                    href={`/jobs/${id}`}
+                    className="flex-1 text-gray-400 px-4 py-2.5 text-sm font-medium text-center transition hover:text-white"
+                    style={{ backgroundColor: '#1A1A1E' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#25252B'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1A1A1E'}
+                  >
+                    Cancel
+                  </Link>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

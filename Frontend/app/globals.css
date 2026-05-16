@@ -34,7 +34,9 @@ body {
   border-radius: 0px !important;
 }
 
-/* Custom scrollbar */
+/* ========== CUSTOM SCROLLBAR - Dark Theme ========== */
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -42,12 +44,86 @@ body {
 
 ::-webkit-scrollbar-track {
   background: #1F1F23;
+  border-left: 1px solid #2A2A2E;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2A2A2E;
+  background: #3A3A40;
+  transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #4A4A50;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #027FDB;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3A3A40 #1F1F23;
+}
+
+/* Specific scrollbar for the cards container */
+.scrollable-cards {
+  scrollbar-width: thin;
+  scrollbar-color: #027FDB #1F1F23;
+}
+
+.scrollable-cards::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-cards::-webkit-scrollbar-track {
+  background: #1F1F23;
+  border-radius: 0px;
+}
+
+.scrollable-cards::-webkit-scrollbar-thumb {
+  background: #027FDB;
+  border-radius: 0px;
+}
+
+.scrollable-cards::-webkit-scrollbar-thumb:hover {
+  background: #0268B5;
+}
+
+/* Hide scrollbar for Chrome/Safari/Edge when not hovering (optional) */
+.scrollable-cards {
+  scrollbar-gutter: stable;
+}
+
+/* Optional: Show scrollbar only on hover */
+.scrollable-cards {
+  scrollbar-width: thin;
+}
+
+.scrollable-cards::-webkit-scrollbar {
+  width: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scrollable-cards:hover::-webkit-scrollbar {
+  width: 6px;
+  opacity: 1;
+}
+
+/* For the main page scrollbar (body) */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #1F1F23;
+}
+
+body::-webkit-scrollbar-thumb {
   background: #3A3A40;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #027FDB;
 }
